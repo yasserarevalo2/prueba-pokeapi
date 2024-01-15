@@ -9,7 +9,7 @@ import { MatPaginator } from '@angular/material/paginator';
   styleUrls: ['./poke-table.component.scss']
 })
 export class PokeTableComponent implements OnInit {
-  displayedColums: string[] = ['position', 'image', 'name'];
+  displayedColumns: string[] = ['position', 'image', 'name'];
   data: any[] = [];
   datasource = new MatTableDataSource<any>(this.data);
   pokemons = [];
@@ -23,15 +23,34 @@ export class PokeTableComponent implements OnInit {
   }
 
   GetPokemons(){
+    let pokemonData;
     for(let i = 1; i <= 150; i++){
     this.PokeapiService.GetPokemons(i).subscribe(
       res => {
-        console.log(res);
+        pokemonData = {
+          position: i,
+          image: res.sprites.front_default,
+          name: res.name
+        };
+        this.data.push(pokemonData);
+        this.datasource = new MatTableDataSource<any>(this.data);
+        this.datasource.paginator = this.paginator;
       },
       err=>{
+        console.log(err);
 
       }
     );
+    }
   }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.datasource.filter = filterValue.trim().toLowerCase();
+
+    if (this.datasource.paginator) {
+      this.datasource.paginator.firstPage();
+    }
   }
+
 }
